@@ -7,7 +7,7 @@
  * @param {Object} ruleset The set of rules to work with, including if
  *      they are errors or warnings.
  */
-function Reporter(lines, ruleset) {
+function Reporter(lines, ruleset, ignore) {
     "use strict";
 
     /**
@@ -39,6 +39,16 @@ function Reporter(lines, ruleset) {
      * @type Object
      */
     this.ruleset = ruleset;
+
+    /**
+     * Linesets not to include in the report.
+     * @property ignore
+     * @type [][]
+     */
+    this.ignore = ignore;
+    if(!this.ignore) {
+        this.ignore = [];
+    }
 }
 
 Reporter.prototype = {
@@ -90,6 +100,17 @@ Reporter.prototype = {
      */
     report: function(message, line, col, rule) {
         "use strict";
+
+        var ignore = false;
+        CSSLint.Util.forEach(this.ignore, function (range) {
+            if(range[0] <= line && line <= range[1]) {
+                ignore = true;
+            }
+        });
+        if(ignore) {
+            return;
+        }
+
         this.messages.push({
             type    : this.ruleset[rule.id] === 2 ? "error" : "warning",
             line    : line,

@@ -177,12 +177,36 @@ var CSSLint = (function() {
         var i = 0,
             reporter,
             lines,
+            ignore = [],
             report,
             parser = new parserlib.css.Parser({ starHack: true, ieFilters: true,
                                                 underscoreHack: true, strict: false });
 
         // normalize line endings
         lines = text.replace(/\n\r?/g, "$split$").split("$split$");
+
+        var ignoreStart = null,
+            ignoreEnd = null;
+        CSSLint.Util.forEach(lines, function (line, lineno) {
+            // Keep oldest, "unclosest" ignore:start
+            if(null === ignoreStart && line.match(/\/\*[ \t]*csslint[ \t]+ignore:start[ \t]*\*\//i)) {
+                ignoreStart = lineno;
+            }
+
+            if(line.match(/\/\*[ \t]*csslint[ \t]+ignore:end[ \t]*\*\//i)) {
+                ignoreEnd = lineno;
+            }
+
+            if(null !== ignoreStart && null !== ignoreEnd) {
+                ignore.push([ignoreStart, ignoreEnd]);
+                ignoreStart = ignoreEnd = null;
+            }
+        });
+
+        // Close remaining ignore block, if any
+        if(null !== ignoreStart) {
+            ignore.push([ignoreStart, lines.length]);
+        }
 
         if (!ruleset) {
             ruleset = this.getRuleset();
@@ -191,7 +215,7 @@ var CSSLint = (function() {
         if (embeddedRuleset.test(text)) {
             //defensively copy so that caller's version does not get modified
             ruleset = clone(ruleset);
-            ruleset = applyEmbeddedRuleset(text, ruleset);
+            ruleset = applyEmbeddedRuleset(text, ruleset, ignore);
         }
 
         reporter = new Reporter(lines, ruleset);
@@ -216,7 +240,8 @@ var CSSLint = (function() {
         report = {
             messages    : reporter.messages,
             stats       : reporter.stats,
-            ruleset     : reporter.ruleset
+            ruleset     : reporter.ruleset,
+            ignore      : ignore
         };
 
         //sort by line numbers, rollups at the bottom
