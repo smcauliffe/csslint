@@ -14,7 +14,8 @@ var CSSLint = (function() {
     var rules           = [],
         formatters      = [],
         embeddedRuleset = /\/\*\s*csslint([^\*]*)\*\//,
-        api             = new parserlib.util.EventTarget();
+        api             = new parserlib.util.EventTarget(),
+        ignore          = [];
 
     api.version = "@VERSION@";
 
@@ -184,6 +185,29 @@ var CSSLint = (function() {
         // normalize line endings
         lines = text.replace(/\n\r?/g, "$split$").split("$split$");
 
+        var ignoreStart = null,
+            ignoreStop = null;
+        CSSLint.Util.forEach(lines, function (line, lineno) {
+            // Keep oldest, "unclosest" ignore:start
+            if(null === ignoreStart && line.match(/[ \t]*\/\*[ \t]+csslint[ \t]+ignore:start[ \t]+\*\//i)) {
+                ignoreStart = lineno;
+            }
+
+            if(line.match(/\/\*[ \t]+csslint[ \t]+ignore:stop[ \t]+\*\//i)) {
+                ignoreStop = lineno;
+            }
+
+            if(null !== ignoreStart && null !== ignoreStop) {
+                ignore.push([ignoreStart, ignoreStop]);
+                ignoreStart = ignoreStop = null;
+            }
+        });
+
+        // Close remaining ignore block, if any
+        if(null !== ignoreStart) {
+            ignore.push([ignoreStart, lines.length + 1]);
+        }
+
         if (!ruleset) {
             ruleset = this.getRuleset();
         }
@@ -191,7 +215,7 @@ var CSSLint = (function() {
         if (embeddedRuleset.test(text)) {
             //defensively copy so that caller's version does not get modified
             ruleset = clone(ruleset);
-            ruleset = applyEmbeddedRuleset(text, ruleset);
+            ruleset = applyEmbeddedRuleset(text, ruleset, ignore);
         }
 
         reporter = new Reporter(lines, ruleset);
