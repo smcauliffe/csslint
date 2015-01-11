@@ -46,6 +46,9 @@ function Reporter(lines, ruleset, ignore) {
      * @type [][]
      */
     this.ignore = ignore;
+    if(!this.ignore) {
+        this.ignore = [];
+    }
 }
 
 Reporter.prototype = {
