@@ -48,6 +48,35 @@
             Assert.areEqual(2, result.ruleset["adjoining-classes"]);
             Assert.areEqual(1, result.ruleset["text-indent"]);
             Assert.areEqual(0, result.ruleset["box-sizing"]);
+        },
+
+        "Full ignore blocks should be captured": function(){
+            var report = CSSLint.verify("/* csslint ignore:start */\n\n/* csslint ignore:stop */");
+            Assert.areEqual(1, report.ignore.length);
+            Assert.areEqual(0, report.ignore[0][0]);
+            Assert.areEqual(2, report.ignore[0][1]);
+        },
+
+        "Whitespace should be no problem inside ignore comments": function(){
+            var report = CSSLint.verify("/*     csslint     ignore:start    */\n\n/*    csslint     ignore:stop     */,\n/*csslint ignore:start*/\n/*csslint ignore:stop*/");
+            Assert.areEqual(2, report.ignore.length);
+            Assert.areEqual(0, report.ignore[0][0]);
+            Assert.areEqual(2, report.ignore[0][1]);
+            Assert.areEqual(3, report.ignore[1][0]);
+            Assert.areEqual(4, report.ignore[1][1]);
+        },
+
+        "Ignore blocks should be autoclosed": function(){
+            var report = CSSLint.verify("/* csslint ignore:start */\n\n");
+            Assert.areEqual(1, report.ignore.length);
+            Assert.areEqual(0, report.ignore[0][0]);
+            Assert.areEqual(3, report.ignore[0][1]);
+        },
+
+        "Restarting ignore should be harmless": function(){
+            var report = CSSLint.verify("/* csslint ignore:start */\n/* csslint ignore:start */\n");
+            Assert.areEqual(1, report.ignore.length);
+            Assert.areEqual(0, report.ignore[0][0]);
         }
 
     }));
