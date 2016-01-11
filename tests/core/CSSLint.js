@@ -51,14 +51,14 @@
         },
 
         "Full ignore blocks should be captured": function(){
-            var report = CSSLint.verify("/* csslint ignore:start */\n\n/* csslint ignore:stop */");
+            var report = CSSLint.verify("/* csslint ignore:start */\n\n/* csslint ignore:end */");
             Assert.areEqual(1, report.ignore.length);
             Assert.areEqual(0, report.ignore[0][0]);
             Assert.areEqual(2, report.ignore[0][1]);
         },
 
         "Whitespace should be no problem inside ignore comments": function(){
-            var report = CSSLint.verify("/*     csslint     ignore:start    */\n\n/*    csslint     ignore:stop     */,\n/*csslint ignore:start*/\n/*csslint ignore:stop*/");
+            var report = CSSLint.verify("/*     csslint     ignore:start    */\n\n/*    csslint     ignore:end     */,\n/*csslint ignore:start*/\n/*csslint ignore:end*/");
             Assert.areEqual(2, report.ignore.length);
             Assert.areEqual(0, report.ignore[0][0]);
             Assert.areEqual(2, report.ignore[0][1]);

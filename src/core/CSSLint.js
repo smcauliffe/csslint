@@ -186,20 +186,20 @@ var CSSLint = (function() {
         lines = text.replace(/\n\r?/g, "$split$").split("$split$");
 
         var ignoreStart = null,
-            ignoreStop = null;
+            ignoreEnd = null;
         CSSLint.Util.forEach(lines, function (line, lineno) {
             // Keep oldest, "unclosest" ignore:start
             if(null === ignoreStart && line.match(/\/\*[ \t]*csslint[ \t]+ignore:start[ \t]*\*\//i)) {
                 ignoreStart = lineno;
             }
 
-            if(line.match(/\/\*[ \t]*csslint[ \t]+ignore:stop[ \t]*\*\//i)) {
-                ignoreStop = lineno;
+            if(line.match(/\/\*[ \t]*csslint[ \t]+ignore:end[ \t]*\*\//i)) {
+                ignoreEnd = lineno;
             }
 
-            if(null !== ignoreStart && null !== ignoreStop) {
-                ignore.push([ignoreStart, ignoreStop]);
-                ignoreStart = ignoreStop = null;
+            if(null !== ignoreStart && null !== ignoreEnd) {
+                ignore.push([ignoreStart, ignoreEnd]);
+                ignoreStart = ignoreEnd = null;
             }
         });
 
