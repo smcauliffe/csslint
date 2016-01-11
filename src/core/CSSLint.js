@@ -14,8 +14,7 @@ var CSSLint = (function() {
     var rules           = [],
         formatters      = [],
         embeddedRuleset = /\/\*\s*csslint([^\*]*)\*\//,
-        api             = new parserlib.util.EventTarget(),
-        ignore          = [];
+        api             = new parserlib.util.EventTarget();
 
     api.version = "@VERSION@";
 
