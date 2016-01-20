@@ -77,6 +77,14 @@
             var report = CSSLint.verify("/* csslint ignore:start */\n/* csslint ignore:start */\n");
             Assert.areEqual(1, report.ignore.length);
             Assert.areEqual(0, report.ignore[0][0]);
+        },
+
+        "Report should not include ignored range": function(){
+            var report = CSSLint.verify(
+              "/* csslint ignore:start */\n .important{ font-size: 14px !important; } \n /* csslint ignore:end */\n" +
+              ".important{ font-size: 14px !important; }"
+            );
+            Assert.areEqual(1, report.messages.length);
         }
 
     }));

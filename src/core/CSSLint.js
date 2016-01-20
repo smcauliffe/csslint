@@ -215,10 +215,10 @@ var CSSLint = (function() {
         if (embeddedRuleset.test(text)) {
             //defensively copy so that caller's version does not get modified
             ruleset = clone(ruleset);
-            ruleset = applyEmbeddedRuleset(text, ruleset, ignore);
+            ruleset = applyEmbeddedRuleset(text, ruleset);
         }
 
-        reporter = new Reporter(lines, ruleset);
+        reporter = new Reporter(lines, ruleset, ignore);
 
         ruleset.errors = 2;       //always report parsing errors as errors
         for (i in ruleset) {
